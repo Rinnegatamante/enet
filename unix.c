@@ -6,7 +6,11 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifndef __vita__
 #include <sys/ioctl.h>
+#else
+#define SOMAXCONN 128
+#endif
 #include <sys/time.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -304,7 +308,12 @@ enet_socket_set_option (ENetSocket socket, ENetSocketOption option, int value)
     {
         case ENET_SOCKOPT_NONBLOCK:
 #ifdef HAS_FCNTL
+#ifdef __vita__
+			result = value ? 1 : 0;
+			result = setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, (char *)&result, sizeof(int));
+#else
             result = fcntl (socket, F_SETFL, (value ? O_NONBLOCK : 0) | (fcntl (socket, F_GETFL) & ~O_NONBLOCK));
+#endif
 #else
             result = ioctl (socket, FIONBIO, & value);
 #endif
