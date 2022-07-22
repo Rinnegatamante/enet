@@ -307,15 +307,14 @@ enet_socket_set_option (ENetSocket socket, ENetSocketOption option, int value)
     switch (option)
     {
         case ENET_SOCKOPT_NONBLOCK:
-#ifdef HAS_FCNTL
 #ifdef __vita__
-			result = value ? 1 : 0;
-			result = setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, (char *)&result, sizeof(int));
+            result = setsockopt (socket, SOL_SOCKET, SO_NONBLOCK, (char *) & value, sizeof (int));
 #else
+#ifdef HAS_FCNTL
             result = fcntl (socket, F_SETFL, (value ? O_NONBLOCK : 0) | (fcntl (socket, F_GETFL) & ~O_NONBLOCK));
-#endif
 #else
             result = ioctl (socket, FIONBIO, & value);
+#endif
 #endif
             break;
 
